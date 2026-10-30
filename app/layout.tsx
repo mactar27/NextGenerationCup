@@ -5,23 +5,31 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Next Generation Cup — Teranga Agency',
   description: 'Plateforme officielle de gestion de la Next Generation Cup présentée par Teranga Agency.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
+        url: '/logo-next-gen-cup.jpg',
+      },
+      {
         url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        sizes: '32x32',
+        type: 'image/png',
       },
       {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/favicon.ico',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: [
+      {
+        url: '/apple-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+      {
+        url: '/logo-next-gen-cup.jpg',
+      },
+    ],
+    shortcut: '/logo-next-gen-cup.jpg',
   },
 }
 
