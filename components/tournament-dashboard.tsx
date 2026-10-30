@@ -730,107 +730,107 @@ export function TournamentDashboard() {
         </header>
 
         {/* Dynamic Content Body */}
-        <main className="flex-1 mx-auto max-w-[1250px] w-full px-4 sm:px-8 py-6">
+        <main className="flex-1 mx-auto max-w-[1250px] w-full px-3.5 sm:px-8 py-4 sm:py-6">
           {/* TAB 1: Tableau de bord */}
           {activeTab === 'Tableau de bord' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* En-tête avec titre et 2 boutons d'action verts maquette */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div>
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                     Tableau de bord
                   </h1>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">
                     Vue d'ensemble de la compétition et de l'activité du tournoi.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setShowAddMatchModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-xs font-bold transition shadow-sm cursor-pointer"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-[11px] sm:text-xs font-bold transition shadow-xs cursor-pointer"
                   >
-                    <CalendarDays size={16} /> Programmer un match
+                    <CalendarDays className="size-3.5 sm:size-4" /> Match
                   </button>
                   <button
                     onClick={() => setShowAddTeamModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-xs font-bold transition shadow-sm cursor-pointer"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-[11px] sm:text-xs font-bold transition shadow-xs cursor-pointer"
                   >
-                    <Plus size={16} /> Ajouter une équipe
+                    <Plus className="size-3.5 sm:size-4" /> Équipe
                   </button>
                 </div>
               </div>
 
-              {/* Statistics Cards selon la maquette avec indicateurs de progression distincts */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Statistics Cards compactes & ergonomiques (Grille 2x2 sur mobile au lieu de 1x4 géant) */}
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
                 {/* Clubs engagés */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="size-10 rounded-xl bg-emerald-50 text-[#157a38] flex items-center justify-center font-bold">
-                      <Trophy size={20} />
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <div className="size-8 sm:size-10 rounded-xl bg-emerald-50 text-[#157a38] flex items-center justify-center font-bold">
+                      <Trophy className="size-4 sm:size-5" />
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full">
-                      +2 cette sem.
+                    <span className="text-[9px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 sm:px-2 py-0.5 rounded-full">
+                      +2 sem.
                     </span>
                   </div>
-                  <div className="mt-3.5 text-xs font-semibold text-slate-500">Clubs engagés</div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight">
-                      {teams.length || 12}
+                  <div className="mt-2.5 sm:mt-3.5 text-[11px] sm:text-xs font-semibold text-slate-500 truncate">Clubs engagés</div>
+                  <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {teams.length || 13}
                     </span>
-                    <span className="text-xs font-bold text-slate-400">Quota max : 21</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-400">/ 21</span>
                   </div>
-                  <div className="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="mt-2.5 sm:mt-3.5 h-1 sm:h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#157a38] rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, Math.round(((teams.length || 12) / 21) * 100))}%` }}
+                      style={{ width: `${Math.min(100, Math.round(((teams.length || 13) / 21) * 100))}%` }}
                     />
                   </div>
                 </div>
 
                 {/* Joueurs enregistrés */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-                      <Users size={20} />
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <div className="size-8 sm:size-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                      <Users className="size-4 sm:size-5" />
                     </div>
-                    <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-full">
-                      +14 vs J-1
+                    <span className="text-[9px] sm:text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-1.5 sm:px-2 py-0.5 rounded-full">
+                      +14 J-1
                     </span>
                   </div>
-                  <div className="mt-3.5 text-xs font-semibold text-slate-500">Joueurs enregistrés</div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight">
-                      {stats?.stats?.registeredPlayers || players.length || 284}
+                  <div className="mt-2.5 sm:mt-3.5 text-[11px] sm:text-xs font-semibold text-slate-500 truncate">Joueurs inscrits</div>
+                  <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {stats?.stats?.registeredPlayers || players.length || 25}
                     </span>
-                    <span className="text-xs font-bold text-slate-400">Capacité : 630</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-400">/ 630</span>
                   </div>
-                  <div className="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="mt-2.5 sm:mt-3.5 h-1 sm:h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, Math.round((((stats?.stats?.registeredPlayers || players.length || 284)) / 630) * 100))}%` }}
+                      style={{ width: `${Math.min(100, Math.round((((stats?.stats?.registeredPlayers || players.length || 25)) / 630) * 100))}%` }}
                     />
                   </div>
                 </div>
 
                 {/* Matchs programmés */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="size-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-                      <CalendarDays size={20} />
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <div className="size-8 sm:size-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+                      <CalendarDays className="size-4 sm:size-5" />
                     </div>
-                    <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                      Phase de poules
+                    <span className="text-[9px] sm:text-[11px] font-bold text-slate-600 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded-full">
+                      Poules
                     </span>
                   </div>
-                  <div className="mt-3.5 text-xs font-semibold text-slate-500">Matchs programmés</div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight">
-                      {matches.length || 8}
+                  <div className="mt-2.5 sm:mt-3.5 text-[11px] sm:text-xs font-semibold text-slate-500 truncate">Matchs prévus</div>
+                  <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {matches.length || 19}
                     </span>
-                    <span className="text-xs font-bold text-amber-600">3 terminés</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-amber-600">3 joués</span>
                   </div>
-                  <div className="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="mt-2.5 sm:mt-3.5 h-1 sm:h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full transition-all duration-500"
                       style={{ width: '45%' }}
@@ -839,23 +839,23 @@ export function TournamentDashboard() {
                 </div>
 
                 {/* Licences actives */}
-                <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="size-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold">
-                      <QrCode size={20} />
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <div className="size-8 sm:size-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold">
+                      <QrCode className="size-4 sm:size-5" />
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <CheckCircle2 size={12} /> 94% validées
+                    <span className="text-[9px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <CheckCircle2 className="size-3" /> 94%
                     </span>
                   </div>
-                  <div className="mt-3.5 text-xs font-semibold text-slate-500">Licences actives</div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight">
-                      {stats?.stats?.validatedLicenses || players.filter((p) => p.status === 'VALIDATED').length || 241}
+                  <div className="mt-2.5 sm:mt-3.5 text-[11px] sm:text-xs font-semibold text-slate-500 truncate">Licences actives</div>
+                  <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {stats?.stats?.validatedLicenses || players.filter((p) => p.status === 'VALIDATED').length || 25}
                     </span>
-                    <span className="text-xs font-bold text-slate-400">Dossiers conformes</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-400">Valides</span>
                   </div>
-                  <div className="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="mt-2.5 sm:mt-3.5 h-1 sm:h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#157a38] rounded-full transition-all duration-500"
                       style={{ width: '94%' }}
