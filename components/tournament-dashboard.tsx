@@ -118,10 +118,12 @@ export function TournamentDashboard() {
   })
   const [matchActionLoading, setMatchActionLoading] = useState(false)
 
-  // Modal Score
+  // Modal Score & Attribution Manuelle du Stade
   const [scoringMatch, setScoringMatch] = useState<any>(null)
-  const [scoreForm, setScoreForm] = useState({ homeScore: 0, awayScore: 0, notes: '', status: 'COMPLETED' })
+  const [scoreForm, setScoreForm] = useState({ homeScore: 0, awayScore: 0, notes: '', status: 'COMPLETED', venue: '' })
   const [scoreLoading, setScoreLoading] = useState(false)
+  const [editingVenueMatch, setEditingVenueMatch] = useState<any>(null)
+  const [editingVenueText, setEditingVenueText] = useState('')
 
   // Rejection modal
   const [rejectingPlayerId, setRejectingPlayerId] = useState<string | null>(null)
@@ -410,6 +412,26 @@ export function TournamentDashboard() {
       notify(`⚠️ ${err.message}`)
     } finally {
       setScoreLoading(false)
+    }
+  }
+
+  // Modification Manuelle du Stade par l'administrateur
+  const handleSaveVenue = async (matchId: string, venue: string) => {
+    try {
+      const res = await fetch('/api/matches', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchId, venue })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la mise à jour du stade.')
+
+      notify(`📍 Stade enregistré : "${venue}"`)
+      setEditingVenueMatch(null)
+      const updatedMatches = await fetch('/api/matches').then((r) => r.json())
+      setMatches(updatedMatches.matches || [])
+    } catch (err: any) {
+      notify(`⚠️ ${err.message}`)
     }
   }
 
@@ -1272,15 +1294,29 @@ export function TournamentDashboard() {
                           </div>
                         </div>
 
-                        <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-0.5">
-                          <div>📅 {m.match_date} à {m.match_time}</div>
-                          <div>📍 {m.venue}</div>
+                        <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+                          <div className="flex items-center gap-1 text-slate-700 font-semibold">
+                            <span>📅 {m.match_date} à {m.match_time}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="truncate">📍 {m.venue || 'Stade non défini'}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingVenueMatch(m)
+                                setEditingVenueText(m.venue || '')
+                              }}
+                              className="text-[10px] font-bold text-[#157a38] hover:underline bg-emerald-50 px-2 py-0.5 rounded cursor-pointer shrink-0"
+                            >
+                              Modifier stade ✏️
+                            </button>
+                          </div>
                           {m.official_notes && <div className="text-slate-400 italic mt-1">« {m.official_notes} »</div>}
                         </div>
                       </div>
 
                       {(isAdmin || isOfficial) && (
-                        <div className="mt-4 pt-3 border-t border-slate-100">
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex gap-2">
                           <button
                             onClick={() => {
                               setScoringMatch(m)
@@ -1288,12 +1324,13 @@ export function TournamentDashboard() {
                                 homeScore: m.home_score || 0,
                                 awayScore: m.away_score || 0,
                                 notes: m.official_notes || '',
-                                status: m.status || 'COMPLETED'
+                                status: m.status || 'COMPLETED',
+                                venue: m.venue || ''
                               })
                             }}
-                            className="w-full py-2 rounded-lg bg-[#157a38] hover:bg-[#11662e] text-white font-bold text-xs transition cursor-pointer shadow-sm text-center"
+                            className="flex-1 py-2 rounded-lg bg-[#157a38] hover:bg-[#11662e] text-white font-bold text-xs transition cursor-pointer shadow-sm text-center"
                           >
-                            ✏️ Saisir / Valider le Score
+                            ✏️ Valider Score
                           </button>
                         </div>
                       )}
@@ -2318,6 +2355,85 @@ export function TournamentDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Modifier le Stade / Terrain manuellement */}
+      {editingVenueMatch && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-extrabold text-[#172033]">
+                Affecter le Stade / Terrain
+              </h3>
+              <button onClick={() => setEditingVenueMatch(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div className="font-bold text-slate-900 text-sm">
+                  {editingVenueMatch.home_team_name} vs {editingVenueMatch.away_team_name}
+                </div>
+                <div className="text-slate-500 mt-1">
+                  📅 {editingVenueMatch.match_date} à {editingVenueMatch.match_time}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Nom du Stade ou Terrain officiel *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingVenueText}
+                  onChange={(e) => setEditingVenueText(e.target.value)}
+                  placeholder="ex: Stade Municipal de Dakar, Alassane Djigo..."
+                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#157a38] focus:outline-none text-xs"
+                />
+              </div>
+
+              {/* Suggestions rapides de stades sénégalais */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'Stade Municipal de Dakar',
+                  'Stade Léopold Sédar Senghor',
+                  'Stade Alassane Djigo (Pikine)',
+                  'Stade Amadou Barry (Guédiawaye)',
+                  'Stade Caroline Faye (Mbour)',
+                  'Stade Aline Sitoé Diatta (Ziguinchor)'
+                ].map((std) => (
+                  <button
+                    key={std}
+                    type="button"
+                    onClick={() => setEditingVenueText(std)}
+                    className="text-[10px] bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200 px-2 py-1 rounded-md transition cursor-pointer"
+                  >
+                    + {std}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingVenueMatch(null)}
+                  className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-bold cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveVenue(editingVenueMatch.id, editingVenueText)}
+                  className="px-4 py-2 rounded-lg bg-[#157a38] hover:bg-[#11662e] text-white font-bold cursor-pointer"
+                >
+                  Enregistrer le Stade
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

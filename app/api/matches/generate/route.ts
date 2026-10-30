@@ -44,7 +44,8 @@ export async function POST(req: Request) {
           matchDateObj.setDate(startDate.getDate() + Math.floor(dayOffset / 2))
           const dateStr = matchDateObj.toISOString().split('T')[0]
           const timeStr = timeSlots[dayOffset % timeSlots.length]
-          const venueStr = venues[dayOffset % venues.length]
+          // Stade à définir manuellement par l'administrateur
+          const venueStr = 'À définir par l\'administrateur'
           const matchId = `match_auto_${Date.now()}_${i}_${j}`
           const poolPhase = `JOURNEE_${(Math.floor(dayOffset / 3) + 1)}`
 
@@ -106,7 +107,8 @@ export async function POST(req: Request) {
         matchDateObj.setDate(startDate.getDate() + Math.floor(dayOffset / 2))
         const dateStr = matchDateObj.toISOString().split('T')[0]
         const timeStr = timeSlots[dayOffset % timeSlots.length]
-        const venueStr = venues[dayOffset % venues.length]
+        // Stade à définir manuellement par l'administrateur
+        const venueStr = 'À définir par l\'administrateur'
         const matchId = `match_auto_${Date.now()}_${i}_${j}`
         const poolPhase = `JOURNEE_${(Math.floor(dayOffset / 3) + 1)}`
 

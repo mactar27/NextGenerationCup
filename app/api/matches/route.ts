@@ -57,7 +57,55 @@ export async function GET(req: Request) {
   }
 }
 
-// POST /api/matches : Programmation d'un match
+// PATCH /api/matches : Mise à jour manuelle du stade ou de l'horaire par l'administrateur
+export async function PATCH(req: Request) {
+  try {
+    const user = await requireOfficialOrAdmin()
+    const body = await req.json()
+    const { matchId, venue, matchDate, matchTime } = body
+
+    if (!matchId || !venue) {
+      return NextResponse.json({ error: 'Identifiant du match et stade requis.' }, { status: 400 })
+    }
+
+    if (IS_MYSQL) {
+      const pool = getMysqlPool()
+      await pool.query(`
+        UPDATE matches
+        SET venue = ?,
+            match_date = COALESCE(?, match_date),
+            match_time = COALESCE(?, match_time)
+        WHERE id = ?
+      `, [venue.trim(), matchDate || null, matchTime || null, matchId])
+
+      logAudit({
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        action: 'AFFECTATION_STADE',
+        entityType: 'MATCH',
+        entityId: matchId,
+        details: `Stade mis à jour : "${venue}"`
+      })
+
+      return NextResponse.json({ success: true, message: 'Stade mis à jour avec succès.' })
+    }
+
+    // Fallback SQLite
+    const db = getDatabase()
+    db.prepare(`
+      UPDATE matches
+      SET venue = ?,
+          match_date = COALESCE(?, match_date),
+          match_time = COALESCE(?, match_time)
+      WHERE id = ?
+    `).run(venue.trim(), matchDate || null, matchTime || null, matchId)
+
+    return NextResponse.json({ success: true, message: 'Stade mis à jour avec succès.' })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: err.status || 500 })
+  }
+}
 export async function POST(req: Request) {
   try {
     const user = await requireOfficialOrAdmin()
