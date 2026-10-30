@@ -534,6 +534,14 @@ export function TournamentDashboard() {
   const isAdmin = currentUser.role === 'ADMIN'
   const isOfficial = currentUser.role === 'OFFICIAL'
 
+  // Vérification de l'état des matchs de poules (la phase finale n'est débloquée que si les poules sont terminées)
+  const poolMatches = matches.filter((m) =>
+    !m.phase || m.phase.startsWith('POULE') || m.phase.startsWith('JOURNEE')
+  )
+  const totalPoolMatches = poolMatches.length
+  const finishedPoolMatches = poolMatches.filter((m) => m.status === 'COMPLETED').length
+  const isPoolStageFinished = totalPoolMatches > 0 && finishedPoolMatches === totalPoolMatches
+
   const menuItems = [
     { label: 'Tableau de bord', icon: Home },
     { label: 'Équipes', icon: Trophy },
@@ -541,7 +549,11 @@ export function TournamentDashboard() {
     { label: 'Licences & QR Codes', icon: FileCheck },
     { label: 'Matchs & Poules', icon: CalendarDays },
     { label: 'Classement', icon: ClipboardList },
-    { label: 'Phase Finale', icon: Award }
+    {
+      label: 'Phase Finale',
+      icon: isPoolStageFinished ? Award : Lock,
+      isLocked: !isPoolStageFinished
+    }
   ]
 
   const phaseOptions = [
@@ -605,23 +617,36 @@ export function TournamentDashboard() {
         </div>
 
         <nav className="mt-4 flex flex-col gap-1 px-3">
-          {menuItems.map(({ label, icon: Icon }) => {
+          {menuItems.map(({ label, icon: Icon, isLocked }: any) => {
             const isActive = activeTab === label
             return (
               <button
                 key={label}
                 onClick={() => {
+                  if (isLocked) {
+                    notify(`🔒 Phase Finale verrouillée : Les matchs de poule sont en cours (${finishedPoolMatches}/${totalPoolMatches} terminés).`)
+                    return
+                  }
                   setActiveTab(label)
                   setMobileOpen(false)
                 }}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-[13px] font-medium transition cursor-pointer ${
+                className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-[13px] font-medium transition cursor-pointer ${
                   isActive
                     ? 'bg-[#157a38] text-white shadow-sm font-semibold'
+                    : isLocked
+                    ? 'text-slate-500 hover:bg-white/5 opacity-80'
                     : 'text-slate-300/90 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400'} />
-                {label}
+                <div className="flex items-center gap-3">
+                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : isLocked ? 'text-slate-500' : 'text-slate-400'} />
+                  <span>{label}</span>
+                </div>
+                {isLocked && (
+                  <span className="text-[10px] bg-white/10 text-amber-300/90 px-1.5 py-0.5 rounded font-mono font-bold">
+                    Verrouillé
+                  </span>
+                )}
               </button>
             )
           })}
@@ -1332,82 +1357,123 @@ export function TournamentDashboard() {
           {/* TAB: Phase Finale & Arbre (Schéma Tableau de Tournoi) */}
           {(activeTab === 'Phase Finale' || activeTab === 'Phase Finale & Arbre') && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                    Schéma de la Phase Finale
-                  </h1>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Tableau officiel à élimination directe : Quarts de Finale ➔ Demi-Finales ➔ Grande Finale & Titre.
+              {!isPoolStageFinished ? (
+                /* Écran de verrouillage réglementaire */
+                <div className="rounded-3xl border border-amber-200/90 bg-white p-8 sm:p-12 shadow-sm text-center max-w-2xl mx-auto my-6">
+                  <div className="size-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200">
+                    <Lock size={32} />
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                    Phase de Poules en cours
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-3 mb-2">
+                    Phase Finale Verrouillée
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
+                    Conformément au règlement officiel du tournoi, le tableau à élimination directe (Quarts de finale, Demi-finales et Finale) ne sera débloqué qu'après la conclusion et validation de tous les matchs de poules.
                   </p>
-                </div>
 
-                {(isAdmin || isOfficial) && (
-                  <button
-                    onClick={() => {
-                      setNewMatchForm({ ...newMatchForm, phase: 'FINALE' })
-                      setShowAddMatchModal(true)
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-xs font-bold transition shadow-sm cursor-pointer"
-                  >
-                    <Plus size={16} /> Programmer un match de phase finale
-                  </button>
-                )}
-              </div>
-
-              {/* Schéma de Tournoi Interactif (Bracket Professionnel) */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm overflow-x-auto">
-                <div className="min-w-[900px] py-4">
-                  {/* En-têtes des étapes */}
-                  <div className="grid grid-cols-3 gap-8 mb-6 text-center">
-                    <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
-                      <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2">
-                        <Layers size={14} className="text-[#157a38]" /> 1/4 de Finale
-                      </span>
+                  {/* Jauge d'avancement des matchs de poules */}
+                  <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 max-w-md mx-auto text-left">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-700 mb-1.5">
+                      <span>Progression des poules</span>
+                      <span className="font-mono text-emerald-800">{finishedPoolMatches} / {totalPoolMatches} matchs joués</span>
                     </div>
-                    <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
-                      <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2">
-                        <Layers size={14} className="text-[#157a38]" /> 1/2 Finales
-                      </span>
+                    <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#157a38] rounded-full transition-all duration-500"
+                        style={{ width: `${totalPoolMatches > 0 ? Math.round((finishedPoolMatches / totalPoolMatches) * 100) : 0}%` }}
+                      />
                     </div>
-                    <div className="px-4 py-2 rounded-xl bg-amber-50/80 border border-amber-200">
-                      <span className="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center justify-center gap-2">
-                        <Trophy size={14} className="text-[#f5c000]" /> Grande Finale
-                      </span>
+                    <div className="text-[11px] text-slate-500 mt-2 flex items-center justify-between">
+                      <span>Matchs restants : <strong className="text-slate-900">{totalPoolMatches - finishedPoolMatches}</strong></span>
+                      <button
+                        onClick={() => setActiveTab('Matchs & Poules')}
+                        className="text-[#157a38] font-bold hover:underline cursor-pointer"
+                      >
+                        Saisir les résultats ➔
+                      </button>
                     </div>
                   </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                        Schéma de la Phase Finale
+                      </h1>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Tableau officiel à élimination directe : Quarts de Finale ➔ Demi-Finales ➔ Grande Finale & Titre.
+                      </p>
+                    </div>
 
-                  {/* Arbre / Bracket Grid avec connecteurs */}
-                  <div className="grid grid-cols-3 gap-8 items-center relative">
-                    {/* Colonne 1: Quarts de Finale (4 matchs) */}
-                    <div className="space-y-6">
-                      {(matches.filter((m) => m.phase === 'QUARTS').length > 0
-                        ? matches.filter((m) => m.phase === 'QUARTS')
-                        : [
-                            { id: 'q1', home_team_name: 'Génération Foot', away_team_name: 'US Gorée', home_score: 3, away_score: 1, status: 'COMPLETED' },
-                            { id: 'q2', home_team_name: 'ASC Ndiambour', away_team_name: 'Jaraaf', home_score: 2, away_score: 1, status: 'COMPLETED' },
-                            { id: 'q3', home_team_name: 'Casa Sports', away_team_name: 'Teungueth FC', home_score: 1, away_score: 0, status: 'COMPLETED' },
-                            { id: 'q4', home_team_name: 'Dakar Sacré-Cœur', away_team_name: 'AS Douanes', home_score: 2, away_score: 0, status: 'COMPLETED' }
-                          ]
-                      ).map((m: any, idx: number) => {
-                        const isFinished = m.status === 'COMPLETED'
-                        const homeWon = isFinished && Number(m.home_score) > Number(m.away_score)
-                        const awayWon = isFinished && Number(m.away_score) > Number(m.home_score)
+                    {(isAdmin || isOfficial) && (
+                      <button
+                        onClick={() => {
+                          setNewMatchForm({ ...newMatchForm, phase: 'FINALE' })
+                          setShowAddMatchModal(true)
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-xs font-bold transition shadow-sm cursor-pointer"
+                      >
+                        <Plus size={16} /> Programmer un match de phase finale
+                      </button>
+                    )}
+                  </div>
 
-                        return (
-                          <div
-                            key={m.id || idx}
-                            className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3 shadow-xs hover:border-[#157a38] transition relative"
-                          >
-                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold mb-1.5 uppercase">
-                              <span>Match Q{idx + 1}</span>
-                              <span className={isFinished ? 'text-emerald-700' : 'text-amber-600'}>
-                                {isFinished ? 'Terminé' : 'À jouer'}
-                              </span>
-                            </div>
+                  {/* Schéma de Tournoi Interactif (Bracket Professionnel) */}
+                  <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm overflow-x-auto">
+                    <div className="min-w-[900px] py-4">
+                      {/* En-têtes des étapes */}
+                      <div className="grid grid-cols-3 gap-8 mb-6 text-center">
+                        <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
+                          <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2">
+                            <Layers size={14} className="text-[#157a38]" /> 1/4 de Finale
+                          </span>
+                        </div>
+                        <div className="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
+                          <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2">
+                            <Layers size={14} className="text-[#157a38]" /> 1/2 Finales
+                          </span>
+                        </div>
+                        <div className="px-4 py-2 rounded-xl bg-amber-50/80 border border-amber-200">
+                          <span className="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center justify-center gap-2">
+                            <Trophy size={14} className="text-[#f5c000]" /> Grande Finale
+                          </span>
+                        </div>
+                      </div>
 
-                            {/* Équipe Domicile */}
-                            <div className={`flex items-center justify-between p-2 rounded-xl mb-1 transition ${
+                      {/* Arbre / Bracket Grid avec connecteurs */}
+                      <div className="grid grid-cols-3 gap-8 items-center relative">
+                        {/* Colonne 1: Quarts de Finale (4 matchs) */}
+                        <div className="space-y-6">
+                          {(matches.filter((m) => m.phase === 'QUARTS').length > 0
+                            ? matches.filter((m) => m.phase === 'QUARTS')
+                            : [
+                                { id: 'q1', home_team_name: 'Génération Foot', away_team_name: 'US Gorée', home_score: 3, away_score: 1, status: 'COMPLETED' },
+                                { id: 'q2', home_team_name: 'ASC Ndiambour', away_team_name: 'Jaraaf', home_score: 2, away_score: 1, status: 'COMPLETED' },
+                                { id: 'q3', home_team_name: 'Casa Sports', away_team_name: 'Teungueth FC', home_score: 1, away_score: 0, status: 'COMPLETED' },
+                                { id: 'q4', home_team_name: 'Dakar Sacré-Cœur', away_team_name: 'AS Douanes', home_score: 2, away_score: 0, status: 'COMPLETED' }
+                              ]
+                          ).map((m: any, idx: number) => {
+                            const isFinished = m.status === 'COMPLETED'
+                            const homeWon = isFinished && Number(m.home_score) > Number(m.away_score)
+                            const awayWon = isFinished && Number(m.away_score) > Number(m.home_score)
+
+                            return (
+                              <div
+                                key={m.id || idx}
+                                className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3 shadow-xs hover:border-[#157a38] transition relative"
+                              >
+                                <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold mb-1.5 uppercase">
+                                  <span>Match Q{idx + 1}</span>
+                                  <span className={isFinished ? 'text-emerald-700' : 'text-amber-600'}>
+                                    {isFinished ? 'Terminé' : 'À jouer'}
+                                  </span>
+                                </div>
+
+                                {/* Équipe Domicile */}
+                                <div className={`flex items-center justify-between p-2 rounded-xl mb-1 transition ${
                               homeWon ? 'bg-emerald-50 text-emerald-950 font-bold border border-emerald-200' : 'bg-white text-slate-800'
                             }`}>
                               <span className="text-xs truncate max-w-[170px]">{m.home_team_name}</span>
@@ -1531,8 +1597,10 @@ export function TournamentDashboard() {
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
+        </div>
+      )}
 
           {/* TAB: Équipes (21 max) */}
           {(activeTab === 'Équipes' || activeTab === 'Équipes (21 max)' || activeTab === 'Mon équipe (Isolation)') && (
