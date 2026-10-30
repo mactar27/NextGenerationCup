@@ -364,6 +364,25 @@ export function TournamentDashboard() {
     }
   }
 
+  // Génération 100% Automatique du calendrier des matchs par l'ordinateur
+  const handleAutoGenerateMatches = async () => {
+    if (!confirm("L'ordinateur va générer automatiquement toutes les confrontations officielles et dates des matchs de poules. Confirmer ?")) {
+      return
+    }
+    notify("⚙️ Génération automatique du calendrier par l'ordinateur en cours...")
+    try {
+      const res = await fetch('/api/matches/generate', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la génération automatique.')
+
+      notify(`✅ ${data.message || 'Calendrier officiel généré automatiquement avec succès !'}`)
+      const updated = await fetch('/api/matches').then((r) => r.json())
+      setMatches(updated.matches || [])
+    } catch (err: any) {
+      notify(`⚠️ ${err.message}`)
+    }
+  }
+
   // Saisie et validation du score
   const handleSaveScore = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -754,10 +773,11 @@ export function TournamentDashboard() {
 
                 <div className="flex items-center gap-2 sm:gap-3">
                   <button
-                    onClick={() => setShowAddMatchModal(true)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#157a38] hover:bg-[#0f602b] text-white text-[11px] sm:text-xs font-bold transition shadow-xs cursor-pointer"
+                    onClick={handleAutoGenerateMatches}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] sm:text-xs font-bold transition shadow-xs cursor-pointer"
+                    title="L'ordinateur génère directement tout le calendrier officiel"
                   >
-                    <CalendarDays className="size-3.5 sm:size-4" /> Match
+                    <CalendarDays className="size-3.5 sm:size-4 text-amber-400" /> Générer matchs (Auto)
                   </button>
                   <button
                     onClick={() => setShowAddTeamModal(true)}
@@ -1140,10 +1160,10 @@ export function TournamentDashboard() {
 
                 {(isAdmin || isOfficial) && (
                   <button
-                    onClick={() => setShowAddMatchModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow cursor-pointer"
+                    onClick={handleAutoGenerateMatches}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm cursor-pointer"
                   >
-                    <Plus size={16} /> Programmer un Match
+                    <CalendarDays size={16} className="text-amber-400" /> Générer automatiquement le calendrier
                   </button>
                 )}
               </div>
