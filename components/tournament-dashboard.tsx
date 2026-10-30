@@ -952,9 +952,10 @@ export function TournamentDashboard() {
                         <div className="absolute inset-y-3 left-0 w-8 border-y-[1.5px] border-r-[1.5px] border-white/70 bg-white/5" />
                         <div className="absolute inset-y-3 right-0 w-8 border-y-[1.5px] border-l-[1.5px] border-white/70 bg-white/5" />
 
-                        {/* Badge de retransmission / Homologation */}
-                        <div className="absolute bottom-1.5 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-xs text-[8px] font-bold text-white tracking-wider flex items-center gap-1">
-                          <span>🇸🇳 DAKAR</span>
+                        {/* Badge officiel du Stade / Terrain */}
+                        <div className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/75 backdrop-blur-xs text-[9px] font-extrabold text-white tracking-wider flex items-center gap-1.5 shadow-sm border border-white/20">
+                          <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>STADE MUNICIPAL DE DAKAR</span>
                         </div>
                       </div>
                     </div>
