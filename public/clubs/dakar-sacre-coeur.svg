@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="dsc-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#7f1d1d" />
+    </linearGradient>
+  </defs>
+  <path d="M50 5 L88 20 L88 60 C88 78 50 95 50 95 C50 95 12 78 12 60 L12 20 Z" fill="url(#dsc-grad)" stroke="#ffffff" stroke-width="2.5" />
+  <!-- Cœur stylisé -->
+  <path d="M50 48 C50 36 34 32 34 44 C34 54 50 64 50 64 C50 64 66 54 66 44 C66 32 50 36 50 48 Z" fill="#ffffff" />
+  <text x="50" y="78" text-anchor="middle" fill="#ffffff" font-family="-apple-system, sans-serif" font-weight="900" font-size="13" letter-spacing="1">DSC</text>
+  <text x="50" y="88" text-anchor="middle" fill="#fecaca" font-family="-apple-system, sans-serif" font-weight="700" font-size="6" letter-spacing="0.5">DAKAR</text>
+</svg>

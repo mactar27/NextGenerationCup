@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="jar-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#073b1e" />
+      <stop offset="100%" stop-color="#021c0d" />
+    </linearGradient>
+  </defs>
+  <path d="M50 5 L88 20 L88 60 C88 78 50 95 50 95 C50 95 12 78 12 60 L12 20 Z" fill="url(#jar-grad)" stroke="#f5c000" stroke-width="2.5" />
+  <circle cx="50" cy="45" r="16" fill="#ffffff" stroke="#073b1e" stroke-width="1.5" />
+  <polygon points="50,38 56,43 54,51 46,51 44,43" fill="#073b1e" />
+  <text x="50" y="78" text-anchor="middle" fill="#f5c000" font-family="-apple-system, sans-serif" font-weight="900" font-size="12" letter-spacing="1">JARAAF</text>
+  <text x="50" y="88" text-anchor="middle" fill="#ffffff" font-family="-apple-system, sans-serif" font-weight="700" font-size="6" letter-spacing="0.5">DAKAR</text>
+</svg>
