@@ -18,8 +18,12 @@ export function getMysqlPool(): mysql.Pool {
       host: process.env.MYSQL_HOST || 'localhost',
       port: Number(process.env.MYSQL_PORT) || 3306,
       user: process.env.MYSQL_USER || 'root',
-      password: process.env.MYSQL_PASSWORD || 'M@tzo2705',
-      database: process.env.MYSQL_DATABASE || 'tournoi_football_2026',
+      password: process.env.MYSQL_PASSWORD || '',
+      database: process.env.MYSQL_DATABASE || 'test',
+      ssl: process.env.MYSQL_SSL === 'true' || process.env.MYSQL_HOST?.includes('tidbcloud.com') ? {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+      } : undefined,
       waitForConnections: true,
       connectionLimit: 15,
       queueLimit: 0,
