@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { requireAuth, requireTeamAccess } from '@/lib/auth/guard'
 import { getMysqlPool, IS_MYSQL, getDatabase } from '@/lib/db'
 import { logAudit } from '@/lib/services/audit'
+import { generateLicenseNumber, generateToken } from '@/lib/auth/crypto'
+import { generateQRCodeSVG } from '@/lib/qr/generate'
 import crypto from 'node:crypto'
 
 // GET /api/players
@@ -164,7 +166,8 @@ export async function POST(req: Request) {
       }
 
       const playerId = `player_${crypto.randomUUID()}`
-      const initialStatus = user.role === 'ADMIN' ? 'VALIDATED' : 'SUBMITTED'
+      // Mode 100% Automatisé : validation immédiate et délivrance instantanée de la licence officielle
+      const initialStatus = 'VALIDATED'
 
       await pool.query(`
         INSERT INTO players (id, team_id, first_name, last_name, birth_date, nationality, jersey_number, position, dominant_foot, address, photo_url, status, observations)
@@ -185,17 +188,37 @@ export async function POST(req: Request) {
         observations || null
       ])
 
+      // Génération automatique de la licence officielle et du QR Code instantané
+      const [cRows]: any = await pool.query('SELECT COUNT(*) as count FROM licenses')
+      const seq = cRows[0].count + 1
+      const licenseNumber = generateLicenseNumber(seq, 2026)
+      const verificationToken = generateToken(16)
+      const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify/${verificationToken}`
+      const qrSvg = await generateQRCodeSVG(verifyUrl, 160)
+
+      await pool.query(`
+        INSERT INTO licenses (id, player_id, team_id, license_number, verification_token, season, issue_date, expiration_date, status, qr_svg)
+        VALUES (?, ?, ?, ?, ?, '2026/2027', CURRENT_DATE, '2027-06-30', 'VALIDATED', ?)
+      `, [
+        `lic_${playerId}`,
+        playerId,
+        teamId,
+        licenseNumber,
+        verificationToken,
+        qrSvg
+      ])
+
       logAudit({
         userId: user.id,
         username: user.username,
         role: user.role,
-        action: 'AJOUT_JOUEUR',
+        action: 'AJOUT_JOUEUR_AUTO',
         entityType: 'PLAYER',
         entityId: playerId,
-        details: `Ajout du joueur ${cleanLn} ${cleanFn} (#${jerseyNumber}) dans l'équipe ${teamId}`
+        details: `Ajout automatique du joueur ${cleanLn} ${cleanFn} (#${jerseyNumber}) avec délivrance de la licence ${licenseNumber}`
       })
 
-      return NextResponse.json({ success: true, playerId, status: initialStatus })
+      return NextResponse.json({ success: true, playerId, status: initialStatus, licenseNumber })
     }
 
     // Fallback SQLite
@@ -206,13 +229,25 @@ export async function POST(req: Request) {
     }
 
     const playerId = `player_${crypto.randomUUID()}`
-    const initialStatus = user.role === 'ADMIN' ? 'VALIDATED' : 'SUBMITTED'
+    const initialStatus = 'VALIDATED'
     db.prepare(`
       INSERT INTO players (id, team_id, first_name, last_name, birth_date, nationality, jersey_number, position, dominant_foot, address, photo_url, status, observations)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(playerId, teamId, cleanFn, cleanLn, birthDate, nationality.trim(), Number(jerseyNumber), position, dominantFoot || 'DROIT', address.trim(), photoUrl || null, initialStatus, observations || null)
 
-    return NextResponse.json({ success: true, playerId, status: initialStatus })
+    const cRow = db.prepare('SELECT COUNT(*) as count FROM licenses').get() as { count: number }
+    const seq = cRow.count + 1
+    const licenseNumber = generateLicenseNumber(seq, 2026)
+    const verificationToken = generateToken(16)
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify/${verificationToken}`
+    const qrSvg = await generateQRCodeSVG(verifyUrl, 160)
+
+    db.prepare(`
+      INSERT INTO licenses (id, player_id, team_id, license_number, verification_token, season, issue_date, expiration_date, status, qr_svg)
+      VALUES (?, ?, ?, ?, ?, '2026/2027', '01/11/2026', '30/06/2027', 'VALIDATED', ?)
+    `).run(`lic_${playerId}`, playerId, teamId, licenseNumber, verificationToken, qrSvg)
+
+    return NextResponse.json({ success: true, playerId, status: initialStatus, licenseNumber })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: err.status || 500 })
   }
