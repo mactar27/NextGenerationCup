@@ -244,23 +244,8 @@ export function TournamentDashboard() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la création de l’équipe.')
 
-      const savedUsername = newTeamForm.managerUsername
-      const savedPassword = newTeamForm.managerPassword
-      const savedTeamName = newTeamForm.name
-      const savedCode = newTeamForm.code
-      const savedManager = newTeamForm.managerName
-
-      notify('✅ Équipe et compte dirigeant créés avec succès !')
+      notify('✅ Équipe enregistrée avec succès !')
       setShowAddTeamModal(false)
-
-      // Afficher le modal avec les identifiants prêts à copier et remettre au dirigeant
-      setCreatedCredentialsModal({
-        teamName: savedTeamName,
-        code: savedCode,
-        username: savedUsername,
-        password: savedPassword,
-        managerName: savedManager
-      })
       setNewTeamForm({
         name: '',
         code: '',
@@ -551,13 +536,12 @@ export function TournamentDashboard() {
 
   const menuItems = [
     { label: 'Tableau de bord', icon: Home },
-    { label: isManager ? 'Mon équipe (Isolation)' : 'Équipes (21 max)', icon: Trophy },
-    { label: isManager ? 'Mes Joueurs (Max 30)' : 'Tous les Joueurs', icon: Users },
+    { label: 'Équipes', icon: Trophy },
+    { label: 'Joueurs', icon: Users },
     { label: 'Licences & QR Codes', icon: FileCheck },
     { label: 'Matchs & Poules', icon: CalendarDays },
-    { label: 'Classement & Poules', icon: ClipboardList },
-    { label: 'Phase Finale & Arbre', icon: Award },
-    ...(isAdmin ? [{ label: 'Journal d\'activité', icon: ShieldCheck }] : [])
+    { label: 'Classement', icon: ClipboardList },
+    { label: 'Phase Finale', icon: Award }
   ]
 
   const phaseOptions = [
@@ -605,22 +589,20 @@ export function TournamentDashboard() {
           </div>
         </button>
 
-        {/* Manager Team Badge Info (Compact pour libérer de l'espace de navigation) */}
-        {isManager && (
-          <div className="mx-3 mt-3 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center gap-2.5">
-            <div className="size-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
-              <Lock size={12} />
+        {/* Badge Administrateur Principal */}
+        <div className="mx-3 mt-3 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs flex items-center gap-2.5">
+          <div className="size-6 rounded-lg bg-[#157a38] text-white flex items-center justify-center shrink-0 font-black text-[10px]">
+            AD
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] text-white font-bold truncate">
+              {currentUser.fullName || 'Administrateur'}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] text-white font-bold truncate">
-                {managerTeamName}
-              </div>
-              <div className="text-[9px] text-amber-300/80 font-medium tracking-tight">
-                Espace club isolé
-              </div>
+            <div className="text-[9px] text-emerald-400 font-medium">
+              Gestionnaire Unique
             </div>
           </div>
-        )}
+        </div>
 
         <nav className="mt-4 flex flex-col gap-1 px-3">
           {menuItems.map(({ label, icon: Icon }) => {
@@ -1278,7 +1260,7 @@ export function TournamentDashboard() {
           )}
 
           {/* TAB: Classement & Poules */}
-          {activeTab === 'Classement & Poules' && (
+          {(activeTab === 'Classement' || activeTab === 'Classement & Poules') && (
             <div className="space-y-6">
               <div>
                 <h1 className="text-2xl font-black text-[#172033] tracking-tight">Classement Officiel du Tournoi</h1>
@@ -1348,7 +1330,7 @@ export function TournamentDashboard() {
           )}
 
           {/* TAB: Phase Finale & Arbre (Schéma Tableau de Tournoi) */}
-          {activeTab === 'Phase Finale & Arbre' && (
+          {(activeTab === 'Phase Finale' || activeTab === 'Phase Finale & Arbre') && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1553,7 +1535,7 @@ export function TournamentDashboard() {
           )}
 
           {/* TAB: Équipes (21 max) */}
-          {(activeTab === 'Équipes (21 max)' || activeTab === 'Mon équipe (Isolation)') && (
+          {(activeTab === 'Équipes' || activeTab === 'Équipes (21 max)' || activeTab === 'Mon équipe (Isolation)') && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1721,7 +1703,7 @@ export function TournamentDashboard() {
           )}
 
           {/* TAB: Tous les Joueurs */}
-          {(activeTab === 'Tous les Joueurs' || activeTab === 'Mes Joueurs (Max 30)') && (
+          {(activeTab === 'Joueurs' || activeTab === 'Tous les Joueurs' || activeTab === 'Mes Joueurs (Max 30)') && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -2577,16 +2559,16 @@ export function TournamentDashboard() {
 
               {/* Informations du Dirigeant Responsable */}
               <div className="pt-3 border-t border-slate-100">
-                <span className="font-bold text-slate-900 block mb-2">Responsable & Dirigeant du Club</span>
+                <span className="font-bold text-slate-900 block mb-2">Responsable du Club</span>
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <div>
-                    <label className="block font-medium text-slate-600 mb-1">Nom du Dirigeant</label>
+                    <label className="block font-medium text-slate-600 mb-1">Nom du Responsable</label>
                     <input
                       type="text"
                       value={newTeamForm.managerName}
                       onChange={(e) => setNewTeamForm({ ...newTeamForm, managerName: e.target.value })}
-                      className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-amber-500 focus:outline-none"
-                      placeholder="ex: Jean-Michel"
+                      className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-[#157a38] focus:outline-none"
+                      placeholder="ex: Mamadou Ndiaye"
                     />
                   </div>
                   <div>
@@ -2595,8 +2577,8 @@ export function TournamentDashboard() {
                       type="tel"
                       value={newTeamForm.managerPhone}
                       onChange={(e) => setNewTeamForm({ ...newTeamForm, managerPhone: e.target.value })}
-                      className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-amber-500 focus:outline-none"
-                      placeholder="+33 6 00 00 00 00"
+                      className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-[#157a38] focus:outline-none"
+                      placeholder="+221 77 000 00 00"
                     />
                   </div>
                 </div>
@@ -2606,43 +2588,9 @@ export function TournamentDashboard() {
                     type="email"
                     value={newTeamForm.managerEmail}
                     onChange={(e) => setNewTeamForm({ ...newTeamForm, managerEmail: e.target.value })}
-                    className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-amber-500 focus:outline-none"
-                    placeholder="dirigeant@club.fr"
+                    className="w-full p-2.5 rounded-lg border border-slate-300 focus:border-[#157a38] focus:outline-none"
+                    placeholder="contact@club.sn"
                   />
-                </div>
-              </div>
-
-              {/* Compte d'accès privé pour ce Dirigeant */}
-              <div className="pt-3 border-t border-slate-100 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80">
-                <span className="font-bold text-emerald-950 block text-xs mb-1">
-                  🔐 Identifiants de connexion du Dirigeant (Accès privé & isolé à son club) *
-                </span>
-                <p className="text-[10px] text-emerald-800/80 mb-3">
-                  Ces identifiants lui permettront d'accéder uniquement à la gestion de son équipe ({newTeamForm.name || 'son club'}) et d'inscrire ses joueurs.
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Identifiant de connexion *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newTeamForm.managerUsername}
-                      onChange={(e) => setNewTeamForm({ ...newTeamForm, managerUsername: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#157a38] focus:outline-none bg-white font-mono"
-                      placeholder="ex: dir_ndiambour"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Mot de passe provisoire *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newTeamForm.managerPassword}
-                      onChange={(e) => setNewTeamForm({ ...newTeamForm, managerPassword: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#157a38] focus:outline-none bg-white font-mono"
-                      placeholder="ex: Club2026!Pass"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -2656,6 +2604,12 @@ export function TournamentDashboard() {
                 </button>
                 <button
                   type="submit"
+                  disabled={teamActionLoading}
+                  className="px-4 py-2 rounded-lg bg-[#157a38] text-white font-bold cursor-pointer hover:bg-[#0f602b]"
+                >
+                  {teamActionLoading ? 'Création...' : 'Ajouter l’équipe'}
+                </button>
+              </div>
                   disabled={teamActionLoading}
                   className="px-4 py-2 rounded-lg bg-[#0f3d23] hover:bg-[#157a38] text-white font-bold cursor-pointer transition disabled:opacity-50"
                 >

@@ -93,10 +93,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Le nom et le code court de l’équipe sont obligatoires.' }, { status: 400 })
     }
 
-    if (!managerUsername || !managerPassword) {
-      return NextResponse.json({ error: 'L\'identifiant et le mot de passe du compte Dirigeant sont obligatoires pour lui permettre d\'accéder à sa page de club.' }, { status: 400 })
-    }
-
     const cleanCode = code.toUpperCase().trim()
     const cleanName = name.trim()
 

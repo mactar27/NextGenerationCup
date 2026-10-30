@@ -83,7 +83,7 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
           {/* Identifiant ou e-mail */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Identifiant ou e-mail
+              Identifiant Administrateur
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -94,7 +94,7 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
                 required
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
-                placeholder="admin ou identifiant dirigeant"
+                placeholder="admin"
                 className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#157a38] focus:ring-2 focus:ring-[#157a38]/20 transition bg-slate-50/50"
               />
             </div>
