@@ -2610,12 +2610,6 @@ export function TournamentDashboard() {
                   {teamActionLoading ? 'Création...' : 'Ajouter l’équipe'}
                 </button>
               </div>
-                  disabled={teamActionLoading}
-                  className="px-4 py-2 rounded-lg bg-[#0f3d23] hover:bg-[#157a38] text-white font-bold cursor-pointer transition disabled:opacity-50"
-                >
-                  {teamActionLoading ? 'Création...' : 'Créer l’Équipe'}
-                </button>
-              </div>
             </form>
           </div>
         </div>
